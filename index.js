@@ -283,6 +283,15 @@ function createChar(location, charmap) {
   }
 }
 
+function print(s)
+{
+  var n = 0;
+  for (var i = 0; i < s.length; i++) {
+    n += write(s[i]);
+  }
+  return n;
+}
+
 // TODO: fix this so that it supports all types of liquid crystal initialization schemes
 function initialize (rs, enable, d0, d1, d2, d3, next)
 {
@@ -326,3 +335,4 @@ exports.rightToLeft = rightToLeft;
 exports.autoscroll = autoscroll;
 exports.noAutoscroll = noAutoscroll;
 exports.createChar = createChar;
+exports.print = print;

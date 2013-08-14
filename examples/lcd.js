@@ -10,7 +10,6 @@ console.log("done initalizing");
 
 console.log("writing to lcd");
 
-// TODO: fix this without porting print
 lcd.print("test");
 
 while(true){
