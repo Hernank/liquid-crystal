@@ -1,4 +1,5 @@
 var tm = process.binding('tm');
+var Tessel = require('tm');
 
 var 
 // commands
@@ -44,7 +45,7 @@ var _data_pins = [],
     _rs = null,
     _rw = null,
     _enable = null,
-    port = Tessel.port('E'),
+    port = Tessel.port('GPIO'),
     OUTPUT = 1, // TODO: these globals should really be exported from tm
     INPUT = 0,
     _displayfunction = null,
@@ -78,11 +79,11 @@ function send(value, mode) {
 
 function pulseEnable() {
   port.gpio(_enable).low();
-  tm.sleep_ms(10);    
+  tm.sleep_ms(1);    
   port.gpio(_enable).high();
-  tm.sleep_ms(10);    // enable pulse must be >450ns
+  tm.sleep_ms(1);    // enable pulse must be >450ns
   port.gpio(_enable).low();
-  tm.sleep_ms(100);   // commands need > 37us to settle
+  tm.sleep_ms(1);   // commands need > 37us to settle
 }
 
 function writebits(length, value) {
@@ -120,7 +121,7 @@ function begin(col, lines){
   // SEE PAGE 45/46 FOR INITIALIZATION SPECIFICATION!
   // according to datasheet, we need at least 40ms after power rises above 2.7V
   // before sending commands. Arduino can turn on way befer 4.5V so we'll wait 50
-  tm.sleep_ms(50000); 
+  tm.sleep_us(50000); 
   // Now we pull both RS and R/W low to begin commands
   port.gpio(_rs).low();
   port.gpio(_enable).low();
@@ -136,15 +137,15 @@ function begin(col, lines){
 
     // we start in 8bit mode, try to set 4 bit mode
     write4bits(0x03);
-    tm.sleep_ms(4500); // wait min 4.1ms
+    tm.sleep_us(4500); // wait min 4.1ms
 
     // second try
     write4bits(0x03);
-    tm.sleep_ms(4500); // wait min 4.1ms
+    tm.sleep_us(4500); // wait min 4.1ms
     
     // third go!
     write4bits(0x03); 
-    tm.sleep_ms(150);
+    tm.sleep_us(150);
 
     // finally, set to 4-bit interface
     write4bits(0x02); 
@@ -154,11 +155,11 @@ function begin(col, lines){
 
     // Send function set command sequence
     command(LCD_FUNCTIONSET | _displayfunction);
-    tm.sleep_ms(4500);  // wait more than 4.1ms
+    tm.sleep_us(4500);  // wait more than 4.1ms
 
     // second try
     command(LCD_FUNCTIONSET | _displayfunction);
-    tm.sleep_ms(150);
+    tm.sleep_us(150);
 
     // third go
     command(LCD_FUNCTIONSET | _displayfunction);
@@ -184,13 +185,13 @@ function begin(col, lines){
 function clear()
 {
   command(LCD_CLEARDISPLAY);  // clear display, set cursor position to zero
-  tm.sleep_ms(2000);  // this command takes a long time!
+  tm.sleep_us(2000);  // this command takes a long time!
 }
 
 function home()
 {
   command(LCD_RETURNHOME);  // set cursor position to zero
-  tm.sleep_ms(2000);  // this command takes a long time!
+  tm.sleep_us(2000);  // this command takes a long time!
 }
 
 function setCursor(col, row)
