@@ -44,7 +44,7 @@ var _data_pins = [],
     _rs = null,
     _rw = null,
     _enable = null,
-    PORT = 'E',
+    port = Tessel.port('E'),
     OUTPUT = 1, // TODO: these globals should really be exported from tm
     INPUT = 0,
     _displayfunction = null,
@@ -61,15 +61,11 @@ function write(value) {
 function command(value) { send(value, LOW); }
 
 function send(value, mode) {
-  if (mode) {
-    Tessel.port(PORT).gpio(_rs).high();
-  } else {
-    Tessel.port(PORT).gpio(_rs).low();
-  }
-
+  port.gpio(_rs).set(mode);
+  
   // if there is a RW pin indicated, set it low to Write
   if (_rw_pin != 255) { 
-    Tessel.port(PORT).gpio(_rw).low();
+    port.gpio(_rw).low();
   }
   
   if (_displayfunction & LCD_8BITMODE) {
@@ -81,23 +77,19 @@ function send(value, mode) {
 }
 
 function pulseEnable() {
-  Tessel.port(PORT).gpio(_enable).low();
-  tm.sleep_ms(1);    
-  Tessel.port(PORT).gpio(_enable).high();
-  tm.sleep_ms(1);    // enable pulse must be >450ns
-  Tessel.port(PORT).gpio(_enable).low();
+  port.gpio(_enable).low();
+  tm.sleep_ms(10);    
+  port.gpio(_enable).high();
+  tm.sleep_ms(10);    // enable pulse must be >450ns
+  port.gpio(_enable).low();
   tm.sleep_ms(100);   // commands need > 37us to settle
 }
 
 function writebits(length, value) {
   for (var i = 0; i < length; i++) {
-    Tessel.port(PORT).gpio(_data_pins[i]).pinMode(OUTPUT);
+    port.gpio(_data_pins[i]).mode(OUTPUT);
     
-    if ((value >> i) & 0x01) {
-      Tessel.port(PORT).gpio(_data_pins[i]).high();
-    } else {
-      Tessel.port(PORT).gpio(_data_pins[i]).low();
-    }
+    port.gpio(_data_pins[i]).set((value >> i) & 0x01);
   }
 
   pulseEnable();
@@ -130,11 +122,11 @@ function begin(col, lines){
   // before sending commands. Arduino can turn on way befer 4.5V so we'll wait 50
   tm.sleep_ms(50000); 
   // Now we pull both RS and R/W low to begin commands
-  Tessel.port(PORT).gpio(_rs).low();
-  Tessel.port(PORT).gpio(_enable).low();
+  port.gpio(_rs).low();
+  port.gpio(_enable).low();
 
   if (_rw != 255) { 
-    Tessel.port(PORT).gpio(_rw).low();
+    port.gpio(_rw).low();
   }
   
   //put the LCD into 4 bit or 8 bit mode
@@ -302,11 +294,11 @@ function initialize (rs, enable, d0, d1, d2, d3, next)
   data_pins[1] = d1;
   data_pins[2] = d2;
   data_pins[3] = d3;
-  Tessel.port(PORT).gpio(_rs).pinMode(OUTPUT);
-  Tessel.port(PORT).gpio(_enable).pinMode(OUTPUT);
+  port.gpio(_rs).mode(OUTPUT);
+  port.gpio(_enable).mode(OUTPUT);
 
   if (_rw != 255){
-    Tessel.port(PORT).gpio(_rw).pinMode(OUTPUT);
+    port.gpio(_rw).mode(OUTPUT);
   }
 
   // always 4 bit mode for now
