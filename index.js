@@ -41,13 +41,13 @@ LCD_5x10DOTS = 0x04,
 LCD_5x8DOTS = 0x00
 ;
 
-var _data_pins = [],
+var datapins = [],
     _rs = null,
     _rw = null,
     _enable = null,
     port = Tessel.port('GPIO'),
-    OUTPUT = 1, // TODO: these globals should really be exported from tm
-    INPUT = 0,
+    OUTPUT = 0, // TODO: these globals should really be exported from tm
+    INPUT = 1,
     _displayfunction = null,
     _numlines = 0,
     _currline = 0,
@@ -63,15 +63,15 @@ function command(value) { send(value, LOW); }
 
 function send(value, mode) {
   port.gpio(_rs).set(mode);
-  
   // if there is a RW pin indicated, set it low to Write
-  if (_rw_pin != 255) { 
+  if (_rw != 255) { 
     port.gpio(_rw).low();
   }
   
   if (_displayfunction & LCD_8BITMODE) {
     write8bits(value); 
   } else {
+    console.log("write 4 ", value);
     write4bits(value>>4);
     write4bits(value);
   }
@@ -88,9 +88,9 @@ function pulseEnable() {
 
 function writebits(length, value) {
   for (var i = 0; i < length; i++) {
-    port.gpio(_data_pins[i]).mode(OUTPUT);
+    port.gpio(datapins[i]).setMode(OUTPUT);
     
-    port.gpio(_data_pins[i]).set((value >> i) & 0x01);
+    port.gpio(datapins[i]).set((value >> i) & 0x01);
   }
 
   pulseEnable();
@@ -280,7 +280,7 @@ function print(s)
 {
   var n = 0;
   for (var i = 0; i < s.length; i++) {
-    n += write(s[i]);
+    n += write(s.charCodeAt(i));
   }
   return n;
 }
@@ -291,20 +291,26 @@ function initialize (rs, enable, d0, d1, d2, d3, next)
   _rs = rs;
   _rw = 255;
   _enable = enable;
-  data_pins[0] = d0;
-  data_pins[1] = d1;
-  data_pins[2] = d2;
-  data_pins[3] = d3;
-  port.gpio(_rs).mode(OUTPUT);
-  port.gpio(_enable).mode(OUTPUT);
+  datapins[0] = d0;
+  datapins[1] = d1;
+  datapins[2] = d2;
+  datapins[3] = d3;
+  console.log(port);
+  console.log('hm', _rs);
+  port.gpio(_rs).setMode(OUTPUT);
+  console.log('er');
+  port.gpio(_enable).setMode(OUTPUT);
+  console.log('hm');
 
   if (_rw != 255){
-    port.gpio(_rw).mode(OUTPUT);
+    console.log('hi');
+    port.gpio(_rw).setMode(OUTPUT);
   }
 
   // always 4 bit mode for now
   _displayfunction = LCD_4BITMODE | LCD_1LINE | LCD_5x8DOTS;
 
+  console.log('ok');
   begin(16, 1);
   if (next != undefined && typeof(next) === 'function') {
     next();
@@ -329,3 +335,20 @@ exports.autoscroll = autoscroll;
 exports.noAutoscroll = noAutoscroll;
 exports.createChar = createChar;
 exports.print = print;
+
+var lcd = exports;
+// var Tessel = require('tm');
+// var tm = process.binding('tm');
+
+// Initialize the lcd.
+console.log("initalizing");
+// var port = Tessel.port('GPIO');
+lcd.initialize(1, 2, 3, 4, 5, 6);
+console.log("done initalizing");
+
+console.log("writing to lcd");
+
+lcd.print("test");
+
+while(true){
+}

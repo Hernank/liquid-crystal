@@ -1,4 +1,5 @@
 var lcd = require('../');
+// var Tessel = require('tm');
 var tm = process.binding('tm');
 
 // Initialize the lcd.
