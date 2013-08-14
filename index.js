@@ -203,7 +203,7 @@ function home()
 
 function setCursor(col, row)
 {
-  int row_offsets[] = { 0x00, 0x40, 0x14, 0x54 };
+  var row_offsets = [0x00, 0x40, 0x14, 0x54];
   if ( row >= _numlines ) {
     row = _numlines-1;    // we count rows starting w/0
   }
@@ -278,7 +278,7 @@ function noAutoscroll() {
 function createChar(location, charmap) {
   location &= 0x7; // we only have 8 locations 0-7
   command(LCD_SETCGRAMADDR | (location << 3));
-  for (int i=0; i<8; i++) {
+  for (var i=0; i<8; i++) {
     write(charmap[i]);
   }
 }
